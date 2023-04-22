@@ -1,46 +1,46 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "sort.h"
-#include "string.h"
 
 /**
- * counting_sort - function that sorts an array of integers
- * in ascending order using the Counting sort algorithm
- * @prmArray: array of int to sort
- * @prmSize: size of the array
- * Return: Nothing void
+ * counting_sort - sorts an array with the Counting sort algorithm
+ * @array: array to sort
+ * @size: size of the array
  */
-void counting_sort(int *prmArray, size_t prmSize)
+void counting_sort(int *array, size_t size)
 {
-	unsigned int i, j;
-	int maxValue = 0, value, index;
-	int *B = malloc(sizeof(int) * prmSize), *tmp;
+	int *count_arr, *out_arr, max, num, j, l;
+	size_t i, k, m, n;
 
-	memcpy(B, prmArray, sizeof(int) * prmSize);
+	if (size < 2)
+		return;
 
-	for (i = 0; i < prmSize; i++)
-		if (prmArray[i] > maxValue)
-			maxValue = B[i];
+	max = array[0];
+	for (i = 1; i < size; i++)
+		if (array[i] > max)
+			max = array[i];
 
-	tmp = malloc(sizeof(int) * (maxValue + 1));
+	count_arr = malloc(sizeof(size_t) * (max + 1));
+	out_arr = malloc(sizeof(int) * size);
 
-	for (i = 0; (int)i <= maxValue; i++)
-		*(tmp + i) = 0;
-
-	for (j = 0; j < prmSize; j++)
-		*(tmp + B[j]) = *(tmp + B[j]) + 1;
-
-	for (i = 1; (int)i <= maxValue; i++)
-		tmp[i] = tmp[i] + tmp[i - 1];
-
-	print_array(tmp, maxValue + 1);
-
-	for (j = prmSize - 1; (int)j >= 0; j--)
+	for (j = 0; j <= max; j++)
+		count_arr[j] = 0;
+	for (k = 0; k < size; k++)
 	{
-		value = *(B + j);
-		index = tmp[value];
-		*(prmArray + index - 1) = value;
-		tmp[value] = tmp[value] - 1;
+		num = array[k];
+		count_arr[num] += 1;
 	}
+	for (l = 1; l <= max; l++)
+		count_arr[l] += count_arr[l - 1];
+	print_array(count_arr, max + 1);
+	for (m = 0; m < size; m++)
+	{
+		out_arr[count_arr[array[m]] - 1] = array[m];
+		count_arr[array[m]]--;
+	}
+	for (n = 0; n < size; n++)
+		array[n] = out_arr[n];
 
-	free(B);
-	free(tmp);
+	free(count_arr);
+	free(out_arr);
 }
