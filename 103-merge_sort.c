@@ -1,83 +1,86 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "sort.h"
-#include "string.h"
 
 /**
- * merge - merge two part of an array
- * @prmArray: array of int to sort
- * @prmStart: start of the array
- * @prmMiddle: middle of the array
- * @prmEnd: end of the array
- * Return: nothing void
- */
-void merge(int *prmArray, int prmStart, int prmMiddle, int prmEnd)
+* merge - Merges the splits from merge_sorty
+* @array: Array split to merge
+* @low: lowest index of split
+* @middle: middle index of split
+* @high: high index of split
+* @temp: temp array for merging
+*/
+
+void merge(int *array, int low, int middle, int high, int *temp)
 {
-	int cLoop1, cLoop2, cLoop3, cLoop4 = 0;
-	int size1 = prmMiddle - prmStart + 1, size2 = prmEnd - prmMiddle;
-	int tmp1[4096], tmp2[4096];
-	int *tmp3 = malloc(sizeof(int) * (size1 + size2));
+	int i, j, k, l = 0, r = 0, n, left[4096], right[4096];
 
-	for (cLoop1 = 0, cLoop2 = 0; cLoop1 < size1 || cLoop2 < size2; cLoop1++, cLoop2++)
+	printf("Merging...\n");
+	i = low, j = middle + 1, k = l = 0;
+	while (i <= middle && j <= high)
 	{
-		tmp1[cLoop1] = prmArray[prmStart + cLoop1];
-		tmp2[cLoop2] = prmArray[prmMiddle + 1 + cLoop2];
-	}
-
-	for (cLoop1 = cLoop2 = 0, cLoop3 = prmStart;
-	     cLoop1 < size1 && cLoop2 < size2; cLoop3++)
-		if (tmp1[cLoop1] <= tmp2[cLoop2])
-			prmArray[cLoop3] = tmp3[cLoop4++] = tmp1[cLoop1++];
+		if (array[i] <= array[j])
+			temp[k] = left[l] = array[i], k++, i++, l++;
 		else
-			prmArray[cLoop3] = tmp3[cLoop4++] = tmp2[cLoop2++];
-
-	printf("Merging...\n[left]: ");
-	print_array(tmp1, size1);
-	printf("[right]: ");
-	print_array(tmp2, size2);
-
-	while (cLoop1 < size1)
-		prmArray[cLoop3++] = tmp3[cLoop4++] = tmp1[cLoop1++];
-
-	while (cLoop2 < size2)
-		prmArray[cLoop3++] = tmp3[cLoop4++] = tmp2[cLoop2++];
-
-	printf("[Done]: ");
-	print_array(tmp3, size1 + size2);
-
-	free(tmp3);
+			temp[k] = right[r] = array[j], k++, j++, r++;
+	}
+	while (i <= middle)
+		temp[k] = left[l] = array[i], k++, i++, l++;
+	while (j <= high)
+		temp[k] = right[r] = array[j], k++, j++, r++;
+	printf("[left]: ");
+	for (n = 0; n < l; n++)
+		(n == 0) ? printf("%d", left[n]) : printf(", %d", left[n]);
+	printf("\n[right]: ");
+	for (n = 0; n < r; n++)
+		(n == 0) ? printf("%d", right[n]) : printf(", %d", right[n]);
+	printf("\n[Done]: ");
+	for (i = low; i <= high; i++)
+	{
+		array[i] = temp[i - low], printf("%d", array[i]);
+		if (i != high)
+			printf(", ");
+		else
+			printf("\n");
+	}
 }
 
 /**
- * sort - sort the array then merge it recursively
- * @prmArray: array of int to sort
- * @prmStart: begin of the array
- * @prmEnd: end of the array
- * Return: nothing void
- */
+* merge_sorty - recurrsive function utilizing merge sort algo
+* @array: Array
+* @low: Lowest index of split
+* @high: highest index of split
+* @temp: temp array for mergin
+*/
 
-void sort(int *prmArray, int prmStart, int prmEnd)
+void merge_sorty(int *array, int low, int high, int *temp)
 {
 	int middle;
 
-	if (prmStart < prmEnd)
+	if (low < high)
 	{
-		middle = (prmStart + prmEnd - 1) / 2;
-		sort(prmArray, prmStart, middle);
-		sort(prmArray, middle + 1, prmEnd);
-		merge(prmArray, prmStart, middle, prmEnd);
+		middle = ((high + low - 1) / 2);
+		merge_sorty(array, low, middle, temp);
+		merge_sorty(array, middle + 1, high, temp);
+		merge(array, low, middle, high, temp);
 	}
 }
 
 /**
- * merge_sort - function that sorts an array of integers in ascending
- * order using the Merge sort algorithm
- * @prmArray: array of int to sort
- * @prmSize: size of the array
- * Return: nothing void
- */
+* merge_sort - Sorts array with merge sort algo
+* @array: array to sort
+* @size: Size of array to sort
+*/
 
-void merge_sort(int *prmArray, size_t prmSize)
+void merge_sort(int *array, size_t size)
 {
-	if (prmArray == NULL || prmSize < 2)
+	int *temp;
+
+	if (array == NULL || size < 2)
 		return;
-	sort(prmArray, 0, prmSize - 1);
+	temp = malloc(sizeof(int) * (size + 1));
+	if (temp == NULL)
+		return;
+	merge_sorty(array, 0, size - 1, temp);
+	free(temp);
 }
